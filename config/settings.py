@@ -1,8 +1,9 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = "dev-only-change-me-pearson-technikum-uz"
-DEBUG = True
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me-pearson-technikum-uz")
+DEBUG = os.environ.get("DEBUG", "False") == "True"  # Production da False bo'lgani yaxshi
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -20,6 +21,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # <--- 1. MANA SHUNI QO'SHDIK (SecurityMiddleware'dan keyin)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -78,12 +80,12 @@ TIME_ZONE = "Asia/Tashkent"
 USE_I18N = True
 USE_TZ = True
 
+# --- 2. STATIK FAYLLAR SOZLAMASI (Yangilandi) ---
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Tutor sifatida ro'yxatdan o'tish uchun maxsus kod (o'quvchilar o'zini tutor qilib qo'ymasligi uchun).
-# Ishlab chiqarishda muhit o'zgaruvchisi orqali o'zgartiring:  set TUTOR_INVITE_CODE=sizning-kodingiz
-import os
+# Tutor sifatida ro'yxatdan o'tish uchun maxsus kod.
 TUTOR_INVITE_CODE = os.environ.get("TUTOR_INVITE_CODE", "TUTOR-2026")
