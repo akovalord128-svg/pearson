@@ -1,0 +1,41 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{{ a.title }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div><a class="link" href="{% url 'tutors:assignments' %}">← {% t "Assignments" %}</a><h1>{{ a.title }}</h1>
+    <p>{{ a.group.name }} • {% t "Due" %} {{ a.due_date|date:"j M Y" }} • {{ a.minutes }} {% t "min" %} • +{{ a.points }} {% t "pts" %}</p></div>
+  <form class="head-actions" method="post" action="{% url 'tutors:assignment_delete' a.pk %}">{% csrf_token %}
+    <button class="btn-small danger" type="submit" data-confirm="{% t "Delete this assignment?" %}">{% t "Delete" %}</button></form>
+</div>
+{% if a.description %}<div class="card"><p class="pre">{{ a.description }}</p></div>{% endif %}
+<div class="kpis kpis-3">
+  <div class="card kpi"><small>{% t "Submitted" %}</small><strong>{{ done }}/{{ total }}</strong></div>
+  <div class="card kpi"><small>{% t "Completion" %}</small><strong>{{ percent }}%</strong></div>
+  <div class="card kpi"><small>{% t "Average grade" %}</small><strong>{% if avg is None %}—{% else %}{{ avg }}%{% endif %}</strong></div>
+</div>
+<div class="card">
+  <h3>{% t "Students" %}</h3>
+  <ul class="review">
+    {% for tk in rows %}
+    <li>
+      <div class="rv-head">
+        <a class="link" href="{% url 'tutors:student_detail' tk.user.pk %}"><strong>{{ tk.user.get_full_name|default:tk.user.username }}</strong></a>
+        {% if tk.status == 'graded' %}<span class="tag ok">{{ tk.score }}/{{ tk.max_score }}</span>
+        {% elif tk.status == 'submitted' %}<span class="tag">{% t "Submitted" %} {{ tk.submitted_at|date:"j M, H:i" }}</span>
+        {% elif tk.status == 'overdue' %}<span class="tag warn">{% t "Overdue" %}</span>
+        {% else %}<span class="tag">{% t "To do" %}</span>{% endif %}
+      </div>
+      {% if tk.done %}
+        {% if tk.answer %}<details open><summary>{% t "Student’s answer" %}</summary><p class="pre">{{ tk.answer }}</p></details>{% endif %}
+        <form class="grade-form" method="post" action="{% url 'tutors:task_grade' tk.pk %}">{% csrf_token %}
+          <input type="number" name="score" min="0" max="{{ tk.max_score }}" value="{{ tk.score|default_if_none:'' }}" placeholder="0–{{ tk.max_score }}" required>
+          <input name="feedback" maxlength="2000" value="{{ tk.feedback }}" placeholder="{% t "Feedback for the student" %}">
+          <button class="btn-small" type="submit">{% if tk.score is None %}{% t "Grade" %}{% else %}{% t "Update" %}{% endif %}</button>
+        </form>
+      {% endif %}
+    </li>
+    {% empty %}<li class="muted">{% t "No students." %}</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

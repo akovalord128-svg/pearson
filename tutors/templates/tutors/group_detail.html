@@ -1,0 +1,36 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{{ group.name }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div><a class="link" href="{% url 'tutors:groups' %}">← {% t "Groups" %}</a><h1>{{ group.name }}</h1>
+    <p>{% t "Group code" %}: <span class="tag code">{{ group.code }}</span> — {% t "students can join with this code in Settings." %}</p></div>
+  <div class="head-actions"><a class="btn-small" href="{% url 'tutors:assignment_create' %}?group={{ group.pk }}"><svg class="ic"><use href="#i-plus"/></svg> {% t "New assignment" %}</a></div>
+</div>
+<div class="two-col">
+  <div class="card">
+    <h3>{% t "Students" %} ({{ members|length }}) · {% t "Completion" %} {{ avg_completion }}%</h3>
+    <div class="table-wrap"><table class="table"><thead><tr><th>{% t "Student" %}</th><th>{% t "Completion" %}</th><th>{% t "Average grade" %}</th><th></th></tr></thead><tbody>
+      {% for s in members %}<tr>
+        <td><a class="link" href="{% url 'tutors:student_detail' s.user.pk %}">{{ s.user.get_full_name|default:s.user.username }}</a>{% if s.inactive %} <span class="tag warn">{% t "Inactive" %}</span>{% endif %}</td>
+        <td>{{ s.completion }}%</td><td>{% if s.avg is None %}—{% else %}{{ s.avg }}%{% endif %}</td>
+        <td><form method="post">{% csrf_token %}<input type="hidden" name="action" value="remove"><input type="hidden" name="student_id" value="{{ s.user.pk }}"><button class="btn-small ghost" type="submit" data-confirm="{% t "Remove this student from the group?" %}">{% t "Remove" %}</button></form></td></tr>
+      {% empty %}<tr><td colspan="4" class="muted">{% t "No students in this group yet." %}</td></tr>{% endfor %}
+    </tbody></table></div>
+    <form class="inline-form" method="post">{% csrf_token %}<input type="hidden" name="action" value="add">
+      <input name="student" placeholder="{% t "Student username or email" %}" required><button class="btn-small" type="submit">{% t "Add student" %}</button></form>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <h3>{% t "Assignments" %}</h3>
+      <ul class="plain">
+        {% for a in assignments %}<li><a class="rowlink" href="{% url 'tutors:assignment_detail' a.pk %}"><div><strong>{{ a.title }}</strong><small>{% t "Due" %} {{ a.due_date|date:"j M" }} • {{ a.done }}/{{ a.total }} {% t "submitted" %}</small></div></a></li>
+        {% empty %}<li class="muted">{% t "No assignments yet." %}</li>{% endfor %}
+      </ul>
+    </div>
+    <form class="card" method="post">{% csrf_token %}<input type="hidden" name="action" value="delete">
+      <h3>{% t "Danger zone" %}</h3>
+      <button class="btn-small danger" type="submit" data-confirm="{% t "Delete this group?" %}">{% t "Delete group" %}</button></form>
+  </div>
+</div>
+{% endblock %}

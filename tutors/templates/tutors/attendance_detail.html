@@ -1,0 +1,92 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Attendance" %} — {{ session.group.name }} {{ session.date|date:"j M Y" }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div>
+    <a class="link" href="{% url 'tutors:attendance_list' %}">← {% t "Back to attendance" %}</a>
+    <h1>{{ session.group.name }} — {{ session.date|date:"j M Y" }}</h1>
+    {% if session.topic %}<p>{{ session.topic }}</p>{% endif %}
+  </div>
+  <div class="head-actions">
+    <form method="post" action="{% url 'tutors:attendance_delete' session.pk %}">
+      {% csrf_token %}
+      <button class="btn-small danger" type="submit" data-confirm="{% t "Delete this session?" %}">
+        {% t "Delete session" %}
+      </button>
+    </form>
+  </div>
+</div>
+
+{# KPI qatorlari #}
+<div class="kpis kpis-6" style="margin-bottom:18px">
+  <div class="card kpi"><small>{% t "Total" %}</small><strong>{{ total }}</strong></div>
+  <div class="card kpi"><small>{% t "Present" %}</small><strong style="color:var(--green)">{{ status_counts.present }}</strong></div>
+  <div class="card kpi"><small>{% t "Late" %}</small><strong style="color:var(--orange)">{{ status_counts.late }}</strong></div>
+  <div class="card kpi {% if status_counts.absent %}kpi-warn{% endif %}"><small>{% t "Absent" %}</small><strong>{{ status_counts.absent }}</strong></div>
+  <div class="card kpi"><small>{% t "Excused" %}</small><strong>{{ status_counts.excused }}</strong></div>
+  <div class="card kpi"><small>{% t "Attendance Rate" %}</small><strong>{{ attendance_pct }}%</strong></div>
+</div>
+
+<form method="post" class="card">
+  {% csrf_token %}
+  <div class="card-head">
+    <h3><svg class="ic"><use href="#i-calendar"/></svg> {% t "Mark attendance" %}</h3>
+  </div>
+  <label style="margin-bottom:14px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:var(--muted)">
+    {% t "Topic (optional)" %}
+    <input type="text" name="topic" value="{{ session.topic }}" maxlength="200"
+           style="height:46px;padding:0 16px;border-radius:16px;font-size:15px;color:var(--ink);background:var(--glass-2);border:1px solid var(--glass-border);box-shadow:inset 0 1px 3px rgba(0,40,110,.08);outline:0">
+  </label>
+
+  <div class="table-wrap"><table class="table wide">
+    <thead><tr>
+      <th>{% t "Student" %}</th>
+      <th>{% t "Status" %}</th>
+      <th>{% t "Note (optional)" %}</th>
+    </tr></thead>
+    <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>
+        <a class="rowlink" href="{% url 'tutors:student_detail' row.student.pk %}">
+          <span class="avatar sm">{{ row.student.first_name|default:row.student.username|slice:":1"|upper }}</span>
+          <div><strong>{{ row.student.get_full_name|default:row.student.username }}</strong>
+               <small>@{{ row.student.username }}</small></div>
+        </a>
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          {% for val, label in status_choices %}
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13.5px;font-weight:600;padding:6px 12px;border-radius:999px;
+            {% if val == 'present' %}background:rgba(47,194,91,.15);color:var(--green)
+            {% elif val == 'late' %}background:rgba(255,159,10,.15);color:var(--orange)
+            {% elif val == 'absent' %}background:rgba(255,69,58,.12);color:var(--red)
+            {% else %}background:var(--track);color:var(--muted){% endif %}">
+            <input type="radio" name="status_{{ row.student.pk }}" value="{{ val }}"
+                   {% if row.status == val %}checked{% endif %}
+                   style="accent-color:currentColor;width:16px;height:16px;padding:0;box-shadow:none">
+            {% t label %}
+          </label>
+          {% endfor %}
+        </div>
+      </td>
+      <td>
+        <input type="text" name="note_{{ row.student.pk }}" value="{{ row.note }}" maxlength="200"
+               placeholder="{% t "Note (optional)" %}"
+               style="height:40px;padding:0 12px;border-radius:12px;font-size:14px;color:var(--ink);background:var(--glass-2);border:1px solid var(--glass-border);outline:0;width:100%;min-width:140px">
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" class="muted">{% t "No students in this group yet." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  {% if rows %}
+  <div style="margin-top:16px">
+    <button class="btn-small" type="submit"><svg class="ic"><use href="#i-check"/></svg> {% t "Save attendance" %}</button>
+  </div>
+  {% endif %}
+</form>
+{% endblock %}

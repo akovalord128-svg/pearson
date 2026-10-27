@@ -1,0 +1,29 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Settings" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Settings" %}</h1></div>
+<div class="two-col">
+  <form class="card form" method="post">{% csrf_token %}<h3>{% t "Profile" %}</h3>
+    <label>{% t "First name" %}{{ profile_form.first_name }}</label>
+    <label>{% t "Last name" %}{{ profile_form.last_name }}</label>
+    <label>{% t "Email address" %}{{ profile_form.email }}</label>
+    {% for e in profile_form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    <button class="btn-small" type="submit">{% t "Save" %}</button>
+  </form>
+  <form class="card form" method="post">{% csrf_token %}<h3>{% t "Change password" %}</h3><input type="hidden" name="action" value="password">
+    <label>{% t "Current password" %}{{ password_form.old_password }}</label>
+    <label>{% t "New password" %}{{ password_form.new_password1 }}</label>
+    <label>{% t "Repeat new password" %}{{ password_form.new_password2 }}</label>
+    {% for f in password_form %}{% for e in f.errors %}<div class="form-error">{{ e }}</div>{% endfor %}{% endfor %}
+    <button class="btn-small" type="submit">{% t "Update password" %}</button>
+  </form>
+  {% if not is_tutor %}
+  <div class="card form"><h3>{% t "My groups" %}</h3>
+    <ul class="plain">{% for g in my_groups %}<li><div><strong>{{ g.name }}</strong><small>{% t "Tutor" %}: {{ g.tutor.get_full_name|default:g.tutor.username }}</small></div></li>{% empty %}<li class="muted">{% t "You are not in any group yet." %}</li>{% endfor %}</ul>
+    <form method="post" class="inline-form">{% csrf_token %}<input type="hidden" name="action" value="join_group">
+      <input name="code" maxlength="8" placeholder="{% t "Group code" %}" required><button class="btn-small" type="submit">{% t "Join group" %}</button></form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

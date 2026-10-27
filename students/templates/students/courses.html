@@ -1,0 +1,30 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "My Courses" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "My Courses" %}</h1>{% if q %}<p>{% t "Results for “%(q)s”" q=q %}</p>{% else %}<p>{% t "Your lessons, clubs and extra classes in one place." %}</p>{% endif %}</div>
+<div class="cards-grid">
+  {% for e in enrollments %}
+  <a class="card course-card" href="{% url 'students:course_detail' e.course.slug %}">
+    <div class="cc-head"><span class="ico ico-{{ e.course.color }}"><svg class="ic"><use href="#i-{{ e.course.icon }}"/></svg></span><strong>{{ e.course.title|tr }}</strong><svg class="ic chev-r"><use href="#i-right"/></svg></div>
+    <small class="cc-sub">{{ e.course.subtitle|tr }}</small>
+    <div class="progress-line"><div class="bar"><i class="fill fill-{{ e.course.color }}" style="width:{{ e.progress }}%"></i></div><b>{{ e.progress }}%</b></div>
+    <small class="cc-next">{% if e.progress >= 100 %}{% t "Completed" %} ✓{% else %}{% t "Next milestone: Level %(n)s" n=e.milestone %}{% endif %}</small>
+  </a>
+  {% empty %}<div class="card empty">{% t "You have not joined any courses yet." %}</div>{% endfor %}
+</div>
+
+{% if available %}
+<div class="page-head sec"><h2>{% t "Explore more" %}</h2><p>{% t "Join a club or an extra class." %}</p></div>
+<div class="cards-grid">
+  {% for c in available %}
+  <div class="card course-card">
+    <div class="cc-head"><span class="ico ico-{{ c.color }}"><svg class="ic"><use href="#i-{{ c.icon }}"/></svg></span><strong>{{ c.title|tr }}</strong></div>
+    <small class="cc-sub">{{ c.subtitle|tr }}</small>
+    <p class="muted small">{{ c.description|tr }}</p>
+    <form method="post" action="{% url 'students:course_join' c.slug %}">{% csrf_token %}<button class="btn-small" type="submit">{% t "Join" %}</button></form>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

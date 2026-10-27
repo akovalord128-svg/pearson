@@ -1,0 +1,19 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Assignments" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div><h1>{% t "Assignments" %}</h1><p>{% t "Tasks you have given to your students." %}</p></div>
+  <div class="head-actions"><a class="btn-small" href="{% url 'tutors:assignment_create' %}"><svg class="ic"><use href="#i-plus"/></svg> {% t "New assignment" %}</a></div>
+</div>
+<div class="cards-grid">
+  {% for a in items %}
+  <a class="card course-card" href="{% url 'tutors:assignment_detail' a.pk %}">
+    <div class="cc-head"><span class="ico ico-{% if a.percent >= 100 %}green{% else %}blue{% endif %}"><svg class="ic"><use href="#i-clipboard"/></svg></span><strong>{{ a.title }}</strong></div>
+    <small class="cc-sub">{{ a.group.name }} • {% t "Due" %} {{ a.due_date|date:"j M" }}</small>
+    <div class="progress-line"><div class="bar"><i class="fill fill-blue" style="width:{{ a.percent }}%"></i></div><b>{{ a.percent }}%</b></div>
+    <small class="cc-next">{{ a.done }}/{{ a.total }} {% t "submitted" %} • {{ a.graded }} {% t "graded" %}</small>
+  </a>
+  {% empty %}<div class="card empty">{% t "No assignments yet." %}</div>{% endfor %}
+</div>
+{% endblock %}

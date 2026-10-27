@@ -1,0 +1,24 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Messages" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Messages" %}</h1><p>{% t "Send an announcement to a group or a message to one student." %}</p></div>
+<div class="two-col">
+  <form class="card form" method="post">{% csrf_token %}
+    <h3>{% t "New message" %}</h3>
+    <label>{% t "To" %}
+      <select name="target" required>
+        <option value="">—</option>
+        <optgroup label="{% t "Groups" %}">{% for g in groups %}<option value="g:{{ g.pk }}">{{ g.name }}</option>{% endfor %}</optgroup>
+        <optgroup label="{% t "Students" %}">{% for s in students %}<option value="s:{{ s.pk }}">{{ s.get_full_name|default:s.username }}</option>{% endfor %}</optgroup>
+      </select></label>
+    <input name="subject" maxlength="150" placeholder="{% t "Subject" %}" required>
+    <textarea name="body" rows="5" placeholder="{% t "Message" %}" required></textarea>
+    <button class="btn-small" type="submit"><svg class="ic"><use href="#i-send"/></svg> {% t "Send" %}</button>
+  </form>
+  <div class="card">
+    <h3>{% t "Sent messages" %}</h3>
+    <ul class="plain">{% for m in sent %}<li><div><strong>{{ m.subject }}</strong><small>{{ m.recipient.get_full_name|default:m.recipient.username }} • {{ m.created|date:"j M, H:i" }}</small></div>{% if m.is_read %}<span class="tag ok">{% t "Read" %}</span>{% endif %}</li>{% empty %}<li class="muted">{% t "No messages." %}</li>{% endfor %}</ul>
+  </div>
+</div>
+{% endblock %}

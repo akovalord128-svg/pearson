@@ -1,0 +1,23 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Groups" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Groups" %}</h1><p>{% t "Organise your students into groups and give them tasks." %}</p></div>
+<div class="two-col">
+  <div class="card">
+    <h3>{% t "My groups" %}</h3>
+    <ul class="plain">
+      {% for g in groups %}
+      <li><a class="rowlink" href="{% url 'tutors:group_detail' g.pk %}"><span class="ico ico-blue"><svg class="ic"><use href="#i-users"/></svg></span><div><strong>{{ g.name }}</strong><small>{{ g.n }} {% t "students" %}{% if g.course %} • {{ g.course.title|tr }}{% endif %}</small></div></a><span class="tag">{{ g.code }}</span></li>
+      {% empty %}<li class="muted">{% t "No groups yet." %}</li>{% endfor %}
+    </ul>
+  </div>
+  <form class="card form" method="post">{% csrf_token %}
+    <h3>{% t "Create a group" %}</h3>
+    {{ form.name }}
+    {% for e in form.name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    <label>{% t "Course" %} ({% t "optional" %}){{ form.course }}</label>
+    <button class="btn-small" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {% t "Create" %}</button>
+  </form>
+</div>
+{% endblock %}

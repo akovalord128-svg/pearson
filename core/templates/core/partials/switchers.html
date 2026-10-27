@@ -1,0 +1,10 @@
+{% load pearson_i18n %}
+<div class="switchers">
+  <form class="lang" method="post" action="{% url 'core:set_language' %}" aria-label="Language">{% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    {% for code, label, name in LANGS %}<button type="submit" name="lang" value="{{ code }}" class="{% if code == LANG %}on{% endif %}" title="{{ name }}">{{ label }}</button>{% endfor %}
+  </form>
+  <button type="button" class="theme-switch" data-theme-toggle title="{% t "Dark / light mode" %}" aria-label="{% t "Dark / light mode" %}">
+    <span class="knob"><svg class="ic ic-sun"><use href="#i-sun"/></svg><svg class="ic ic-moon"><use href="#i-moon"/></svg></span>
+  </button>
+</div>

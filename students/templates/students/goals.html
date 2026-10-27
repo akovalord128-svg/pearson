@@ -1,0 +1,15 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "My Goals" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "My Goals" %}</h1><p>{% t "Your goals matter!" %} {% t "Keep learning." %} {% t "Keep growing." %}</p></div>
+<div class="card">
+  <form class="inline-form" method="post">{% csrf_token %}<input name="title" maxlength="150" placeholder="{% t "Add a new goal…" %}" required><button class="btn-small" type="submit">{% t "Add" %}</button></form>
+  <ul class="plain">
+    {% for g in goals %}
+    <li class="{% if g.done %}done{% endif %}"><div><strong>{{ g.title|tr }}</strong></div>
+      <form method="post" action="{% url 'students:goal_toggle' g.pk %}">{% csrf_token %}<button class="btn-small {% if g.done %}ghost{% endif %}" type="submit">{% if g.done %}{% t "Undo" %}{% else %}{% t "Done" %}{% endif %}</button></form></li>
+    {% empty %}<li class="muted">{% t "No goals yet — add your first one above." %}</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

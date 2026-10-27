@@ -1,0 +1,11 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Messages" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Messages" %}</h1></div>
+<div class="card"><ul class="plain msgs">
+  {% for m in items %}
+  <li class="{% if not m.is_read %}unread{% endif %}"><a href="{% url 'students:message_detail' m.pk %}"><div><strong>{{ m.subject|tr }}</strong><small>{{ m.sender|tr }} • {{ m.created|date:"j M, H:i" }}</small></div>{% if not m.is_read %}<span class="dot"></span>{% endif %}</a></li>
+  {% empty %}<li class="muted">{% t "No messages." %}</li>{% endfor %}
+</ul></div>
+{% endblock %}

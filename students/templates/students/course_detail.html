@@ -1,0 +1,32 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{{ course.title|tr }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><a class="link" href="{% url 'students:courses' %}">← {% t "My Courses" %}</a>
+  <h1><span class="ico ico-{{ course.color }}"><svg class="ic"><use href="#i-{{ course.icon }}"/></svg></span> {{ course.title|tr }}</h1>
+  <p>{{ course.subtitle|tr }}</p></div>
+<div class="two-col">
+  <div class="card">
+    <h3>{% t "About" %}</h3><p>{{ course.description|tr }}</p>
+    {% if enrollment %}
+      <div class="progress-line"><div class="bar"><i class="fill fill-{{ course.color }}" style="width:{{ enrollment.progress }}%"></i></div><b>{{ enrollment.progress }}%</b></div>
+      <small class="cc-next">{% t "Next milestone: Level %(n)s" n=enrollment.milestone %}</small>
+    {% else %}
+      <form method="post" action="{% url 'students:course_join' course.slug %}">{% csrf_token %}<button class="btn-small" type="submit">{% t "Join this course" %}</button></form>
+    {% endif %}
+    <h3 class="mt">{% t "Practice" %}</h3>
+    <ul class="plain">
+      {% for a in activities %}
+      <li><div><strong>{{ a.title|tr }}</strong><small>{{ a.minutes }} {% t "min" %} • +{{ a.points }} {% t "pts" %}</small></div>
+        <form method="post" action="{% url 'students:practice_start' a.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="btn-small" type="submit">{% t "Start" %}</button></form></li>
+      {% empty %}<li class="muted">{% t "No practice activities yet." %}</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3>{% t "Homework" %}</h3>
+    <ul class="plain">{% for tk in tasks %}<li><div><strong>{{ tk.title|tr }}</strong><small>{{ tk.due_label }} • {{ tk.minutes }} {% t "min" %}</small></div>{% if tk.done %}<span class="tag ok">{% t "Done" %}</span>{% endif %}</li>{% empty %}<li class="muted">{% t "No homework." %}</li>{% endfor %}</ul>
+    <h3 class="mt">{% t "Grades" %}</h3>
+    <ul class="plain">{% for g in grades %}<li><div><strong>{{ g.title|tr }}</strong><small>{{ g.date|date:"j M Y" }}</small></div><b>{{ g.score }}/{{ g.max_score }}</b></li>{% empty %}<li class="muted">{% t "No grades yet." %}</li>{% endfor %}</ul>
+  </div>
+</div>
+{% endblock %}

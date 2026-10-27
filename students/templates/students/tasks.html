@@ -1,0 +1,38 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Homework & Tasks" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Homework & Tasks" %}</h1><p>{% t "Complete tasks in order and plan your next day." %}</p></div>
+<div class="card">
+  <h3>{% t "To do" %}</h3>
+  <ul class="tasklist big">
+    {% for tk in open_tasks %}
+    <li class="task-item">
+      <span class="ico ico-{{ tk.color }} round"><svg class="ic"><use href="#i-{{ tk.icon }}"/></svg></span>
+      <div class="grow">
+        <strong>{{ tk.title|tr }}</strong>
+        <small>{{ tk.course.title|default:"General"|tr }} • {{ tk.minutes }} {% t "min" %}{% if tk.assigned_by %} • {% t "From" %}: {{ tk.assigned_by.get_full_name|default:tk.assigned_by.username }}{% endif %}{% if tk.assignment %} • +{{ tk.reward }} {% t "pts" %}{% endif %}</small>
+        {% if tk.description %}<p class="desc">{{ tk.description }}</p>{% endif %}
+        {% if tk.assignment %}
+        <form method="post" action="{% url 'students:task_toggle' tk.pk %}" class="answer-form">{% csrf_token %}
+          <textarea name="answer" rows="2" placeholder="{% t "Write your answer (optional)" %}"></textarea>
+          <button class="btn-small" type="submit">{% t "Submit" %}</button>
+        </form>
+        {% endif %}
+      </div>
+      <span class="due {% if tk.is_overdue %}late{% endif %}"><svg class="ic"><use href="#i-calendar"/></svg> {{ tk.due_label }}{% if tk.is_overdue %} · {% t "Overdue" %}{% endif %}</span>
+      {% if not tk.assignment %}
+      <form method="post" action="{% url 'students:task_toggle' tk.pk %}">{% csrf_token %}<button class="btn-small" type="submit">{% t "Mark done" %}</button></form>
+      {% endif %}
+    </li>
+    {% empty %}<li class="muted">{% t "All done — nothing left!" %} 🎉</li>{% endfor %}
+  </ul>
+  {% if done_tasks %}<h3 class="mt">{% t "Completed" %}</h3>
+  <ul class="tasklist big done">{% for tk in done_tasks %}
+    <li class="task-item"><span class="ico ico-green round"><svg class="ic"><use href="#i-check"/></svg></span>
+    <div class="grow"><strong>{{ tk.title|tr }}</strong><small>{{ tk.course.title|default:"General"|tr }}{% if tk.assigned_by %} • {{ tk.assigned_by.get_full_name|default:tk.assigned_by.username }}{% endif %}</small>
+      {% if tk.score is not None %}<span class="tag ok">{% t "Score" %}: {{ tk.score }}/{{ tk.max_score }}</span>{% elif tk.assignment %}<span class="tag">{% t "Waiting for review" %}</span>{% endif %}
+      {% if tk.feedback %}<p class="desc fb">💬 {{ tk.feedback }}</p>{% endif %}</div>
+    {% if tk.score is None %}<form method="post" action="{% url 'students:task_toggle' tk.pk %}">{% csrf_token %}<button class="btn-small ghost" type="submit">{% t "Undo" %}</button></form>{% endif %}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% endblock %}

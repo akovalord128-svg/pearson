@@ -1,0 +1,41 @@
+{% extends 'core/base_auth.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Create an account" %} — Pearson Technikum UZ{% endblock %}
+{% block content %}
+<h1 class="auth-title">{% t "Create your account" %}</h1>
+<p class="auth-sub">{% t "Join Pearson and start learning today" %}</p>
+<form method="post" novalidate data-register>
+  {% csrf_token %}
+  <div class="role-pick">
+    {% for radio in form.role %}
+    <label class="role-card">
+      {{ radio.tag }}
+      <span><svg class="ic"><use href="#i-{% if radio.data.value == 'tutor' %}users{% else %}book-open{% endif %}"/></svg>
+        <b>{% if radio.data.value == 'tutor' %}{% t "I am a tutor" %}{% else %}{% t "I am a student" %}{% endif %}</b>
+        <small>{% if radio.data.value == 'tutor' %}{% t "Give tasks and track students" %}{% else %}{% t "Learn, practise and grow" %}{% endif %}</small></span>
+    </label>
+    {% endfor %}
+  </div>
+  {% for e in form.role.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+
+  <label class="field field-plain">{{ form.full_name }}</label>
+  {% for e in form.full_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+  <label class="field field-plain">{{ form.email }}</label>
+  {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+  <label class="field field-plain">{{ form.username }}</label>
+  {% for e in form.username.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+  <label class="field field-plain">{{ form.password1 }}</label>
+  {% for e in form.password1.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+  <label class="field field-plain">{{ form.password2 }}</label>
+  {% for e in form.password2.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+
+  <div data-tutor-code {% if form.role.value != 'tutor' %}hidden{% endif %}>
+    <label class="field field-plain">{{ form.tutor_code }}</label>
+    {% for e in form.tutor_code.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    <p class="hint">{% t "Tutors need an access code from the school administration." %}</p>
+  </div>
+
+  <button class="btn-primary mt-btn" type="submit">{% t "Create an account" %}</button>
+</form>
+<p class="auth-foot">{% t "Already have an account?" %}<br><a class="link strong" href="{% url 'accounts:login' %}">{% t "Sign In" %}</a></p>
+{% endblock %}

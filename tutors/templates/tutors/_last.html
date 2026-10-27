@@ -1,0 +1,1 @@
+{% load pearson_i18n %}{% if s.days_inactive is None %}{% t "Never" %}{% elif s.days_inactive == 0 %}{% t "Today" %}{% else %}{% t "%(n)s days ago" n=s.days_inactive %}{% endif %}

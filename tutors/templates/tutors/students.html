@@ -1,0 +1,41 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Students" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div><h1>{% t "Students" %}</h1><p>{% t "Track progress, grades and activity of your students." %}</p></div>
+  <div class="head-actions"><a class="btn-small ghost" href="{% url 'tutors:students_export' %}?{{ request.GET.urlencode }}"><svg class="ic"><use href="#i-download"/></svg> {% t "Export CSV" %}</a></div>
+</div>
+<form class="card filters" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="{% t "Search students..." %}">
+  <select name="group" onchange="this.form.submit()">
+    <option value="">{% t "All groups" %}</option>
+    {% for g in groups %}<option value="{{ g.pk }}" {% if gid == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
+  </select>
+  <select name="sort" onchange="this.form.submit()">
+    <option value="name" {% if sort == 'name' %}selected{% endif %}>{% t "Sort: name" %}</option>
+    <option value="points" {% if sort == 'points' %}selected{% endif %}>{% t "Sort: points" %}</option>
+    <option value="completion" {% if sort == 'completion' %}selected{% endif %}>{% t "Sort: completion (lowest first)" %}</option>
+    <option value="avg" {% if sort == 'avg' %}selected{% endif %}>{% t "Sort: average grade" %}</option>
+    <option value="inactive" {% if sort == 'inactive' %}selected{% endif %}>{% t "Sort: inactive longest" %}</option>
+  </select>
+  <button class="btn-small" type="submit">{% t "Search" %}</button>
+</form>
+<div class="card">
+  <div class="table-wrap"><table class="table wide">
+    <thead><tr><th>{% t "Student" %}</th><th>{% t "Level" %}</th><th>{% t "Points" %}</th><th>{% t "Completion" %}</th><th>{% t "Average grade" %}</th><th>{% t "Overdue" %}</th><th>{% t "Last active" %}</th></tr></thead>
+    <tbody>
+    {% for s in stats %}
+      <tr class="{% if s.inactive %}row-warn{% endif %}">
+        <td><a class="rowlink" href="{% url 'tutors:student_detail' s.user.pk %}"><span class="avatar sm">{{ s.user.first_name|default:s.user.username|slice:":1"|upper }}</span><div><strong>{{ s.user.get_full_name|default:s.user.username }}</strong><small>@{{ s.user.username }}</small></div></a></td>
+        <td>{{ s.profile.level }}</td>
+        <td>{{ s.profile.points }}</td>
+        <td><div class="progress-line mini"><div class="bar"><i class="fill fill-blue" style="width:{{ s.completion }}%"></i></div><b>{{ s.completion }}%</b></div><small class="muted">{{ s.done }}/{{ s.total }}</small></td>
+        <td>{% if s.avg is None %}—{% else %}<b>{{ s.avg }}%</b>{% endif %}</td>
+        <td>{% if s.overdue %}<span class="tag warn">{{ s.overdue }}</span>{% else %}0{% endif %}</td>
+        <td>{% include 'tutors/_last.html' %}{% if s.inactive %} <span class="tag warn">{% t "Inactive" %}</span>{% endif %}</td>
+      </tr>
+    {% empty %}<tr><td colspan="7" class="muted">{% t "No students yet — create a group and add students." %}</td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+{% endblock %}

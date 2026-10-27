@@ -1,0 +1,26 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{{ title|tr }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ title|tr }}</h1><p>{% t "Practice a little every day — small steps lead to big results." %}</p></div>
+<div class="chips">
+  <a class="chip {% if kind == 'all' %}on{% endif %}" href="{% url 'students:practice' %}">{% t "All" %}</a>
+  <a class="chip {% if kind == 'speaking' %}on{% endif %}" href="{% url 'students:practice_kind' 'speaking' %}">{% t "Speaking" %}</a>
+  <a class="chip {% if kind == 'listening' %}on{% endif %}" href="{% url 'students:practice_kind' 'listening' %}">{% t "Listening" %}</a>
+  <a class="chip {% if kind == 'writing' %}on{% endif %}" href="{% url 'students:practice_kind' 'writing' %}">{% t "Writing" %}</a>
+  <a class="chip {% if kind == 'quizzes' %}on{% endif %}" href="{% url 'students:practice_kind' 'quizzes' %}">{% t "Quizzes" %}</a>
+</div>
+<div class="two-col">
+  <div class="card">
+    <ul class="plain">
+      {% for a in activities %}
+      <li><div><strong>{{ a.title|tr }}</strong><small>{{ a.course.title|default:"General"|tr }} • {{ a.minutes }} {% t "min" %} • +{{ a.points }} {% t "pts" %}</small>{% if a.description %}<small>{{ a.description|tr }}</small>{% endif %}</div>
+        <form method="post" action="{% url 'students:practice_start' a.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="btn-small" type="submit">{% t "Start" %}</button></form></li>
+      {% empty %}<li class="muted">{% t "No activities here yet." %}</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="card"><h3>{% t "Recent sessions" %}</h3>
+    <ul class="plain">{% for s in recent %}<li><div><strong>{{ s.activity.title|tr }}</strong><small>{{ s.created|date:"j M, H:i" }}</small></div><b>+{{ s.activity.points }}</b></li>{% empty %}<li class="muted">{% t "Nothing yet — start your first session!" %}</li>{% endfor %}</ul>
+  </div>
+</div>
+{% endblock %}

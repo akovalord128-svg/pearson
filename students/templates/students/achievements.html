@@ -1,0 +1,15 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Achievements" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Achievements" %}</h1><p>{% t "%(n)s earned — keep going!" n=earned_count %}</p></div>
+<div class="cards-grid">
+  {% for it in items %}
+  <div class="card ach {% if not it.earned_at %}locked{% endif %}">
+    <span class="ico ico-{{ it.a.color }} big"><svg class="ic"><use href="#i-{{ it.a.icon }}"/></svg></span>
+    <div><strong>{{ it.a.title|tr }}</strong><small>{{ it.a.description|tr }}</small>
+      {% if it.earned_at %}<span class="tag ok">{% t "Earned" %} {{ it.earned_at|date:"j M Y" }}</span>{% else %}<span class="tag">+{{ it.a.points }} {% t "pts" %}</span>{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

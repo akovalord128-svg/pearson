@@ -1,0 +1,60 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{{ student.get_full_name|default:student.username }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><a class="link" href="{% url 'tutors:students' %}">← {% t "Students" %}</a>
+  <h1><span class="avatar">{{ student.first_name|default:student.username|slice:":1"|upper }}</span> {{ student.get_full_name|default:student.username }}</h1>
+  <p>@{{ student.username }} • {{ student.email }}{% if groups %} • {% for g in groups %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</p></div>
+
+<div class="kpis kpis-6">
+  <div class="card kpi"><small>{% t "Points" %}</small><strong>{{ s.profile.points }}</strong></div>
+  <div class="card kpi"><small>{% t "Level" %}</small><strong>{{ s.profile.level }}</strong></div>
+  <div class="card kpi"><small>{% t "Completion" %}</small><strong>{{ s.completion }}%</strong></div>
+  <div class="card kpi"><small>{% t "Average grade" %}</small><strong>{% if s.avg is None %}—{% else %}{{ s.avg }}%{% endif %}</strong></div>
+  <div class="card kpi {% if s.overdue %}kpi-warn{% endif %}"><small>{% t "Overdue" %}</small><strong>{{ s.overdue }}</strong></div>
+  <div class="card kpi"><small>{% t "Last active" %}</small><strong class="kpi-sm">{% include 'tutors/_last.html' %}</strong></div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h3>{% t "Assigned tasks" %}</h3>
+    <div class="table-wrap"><table class="table"><thead><tr><th>{% t "Task" %}</th><th>{% t "Due" %}</th><th>{% t "Status" %}</th><th>{% t "Score" %}</th></tr></thead><tbody>
+      {% for tk in tasks %}<tr>
+        <td><a class="link" href="{% url 'tutors:assignment_detail' tk.assignment_id %}">{{ tk.title }}</a></td>
+        <td>{{ tk.due_date|date:"j M" }}</td>
+        <td>{% if tk.status == 'graded' %}<span class="tag ok">{% t "Graded" %}</span>{% elif tk.status == 'submitted' %}<span class="tag">{% t "Submitted" %}</span>{% elif tk.status == 'overdue' %}<span class="tag warn">{% t "Overdue" %}</span>{% else %}<span class="tag">{% t "To do" %}</span>{% endif %}</td>
+        <td>{% if tk.score is not None %}<b>{{ tk.score }}/{{ tk.max_score }}</b>{% else %}—{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="4" class="muted">{% t "No assigned tasks yet." %}</td></tr>{% endfor %}
+    </tbody></table></div>
+
+    <h3 class="mt">{% t "Courses" %}</h3>
+    {% for e in courses %}<div class="stat"><div class="stat-top"><span>{{ e.course.title|tr }}</span><b>{{ e.progress }}%</b></div><div class="bar"><i class="fill fill-{{ e.course.color }}" style="width:{{ e.progress }}%"></i></div></div>{% empty %}<p class="muted">{% t "You have not joined any courses yet." %}</p>{% endfor %}
+
+    <h3 class="mt">{% t "Weekly Progress" %}</h3>
+    <div class="chart chart-short"><div class="plot"><div class="grid"><i></i><i></i><i></i><i></i><i></i></div><div class="bars">
+      {% for d in week %}<div class="barcol"><div class="bar-wrap"><em>{{ d.percent }}%</em><span style="height:{{ d.percent }}%"></span></div><label>{{ d.label|tr }}</label></div>{% endfor %}
+    </div></div></div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h3>{% t "Grades" %}</h3>
+      <ul class="plain">{% for g in grades %}<li><div><strong>{{ g.title }}</strong><small>{{ g.date|date:"j M Y" }}</small></div><b>{{ g.score }}/{{ g.max_score }}</b></li>{% empty %}<li class="muted">{% t "No grades yet." %}</li>{% endfor %}</ul>
+    </div>
+    <form class="card form" method="post">{% csrf_token %}<input type="hidden" name="action" value="message">
+      <h3>{% t "Send a message" %}</h3>
+      <input name="subject" maxlength="150" placeholder="{% t "Subject" %}" required>
+      <textarea name="body" rows="3" placeholder="{% t "Message" %}" required></textarea>
+      <button class="btn-small" type="submit"><svg class="ic"><use href="#i-send"/></svg> {% t "Send" %}</button>
+    </form>
+    <div class="card">
+      <h3>{% t "Private notes" %}</h3>
+      <p class="muted small">{% t "Only you can see these notes." %}</p>
+      <form class="form" method="post">{% csrf_token %}<input type="hidden" name="action" value="note">
+        <textarea name="text" rows="2" placeholder="{% t "Write a note…" %}" required></textarea>
+        <button class="btn-small ghost" type="submit">{% t "Save note" %}</button></form>
+      <ul class="plain">{% for n in notes %}<li><div><span class="pre">{{ n.text }}</span><small>{{ n.created|date:"j M Y, H:i" }}</small></div></li>{% endfor %}</ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

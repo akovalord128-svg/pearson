@@ -1,0 +1,63 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Attendance List" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div><h1>{% t "Attendance" %}</h1><p>{% t "Track which students attended each lesson." %}</p></div>
+  <div class="head-actions">
+    <a class="btn-small" href="{% url 'tutors:attendance_create' %}"><svg class="ic"><use href="#i-plus"/></svg> {% t "New Session" %}</a>
+  </div>
+</div>
+
+<form class="card filters" method="get">
+  <select name="group" onchange="this.form.submit()">
+    <option value="">{% t "All groups" %}</option>
+    {% for g in groups %}<option value="{{ g.pk }}" {% if gid == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
+  </select>
+  <button class="btn-small ghost" type="submit">{% t "Filter" %}</button>
+</form>
+
+<div class="card">
+  <div class="table-wrap"><table class="table wide">
+    <thead><tr>
+      <th>{% t "Date" %}</th>
+      <th>{% t "Group" %}</th>
+      <th>{% t "Topic" %}</th>
+      <th>{% t "Present" %}</th>
+      <th>{% t "Late" %}</th>
+      <th>{% t "Absent" %}</th>
+      <th>{% t "Excused" %}</th>
+      <th>{% t "Attendance Rate" %}</th>
+      <th></th>
+    </tr></thead>
+    <tbody>
+    {% for s in sessions %}
+      {% with rate=s.present|add:s.late %}
+      <tr>
+        <td><strong>{{ s.date|date:"j M Y" }}</strong></td>
+        <td>{{ s.group.name }}</td>
+        <td>{{ s.topic|default:"—" }}</td>
+        <td><span class="tag ok">{{ s.present }}</span></td>
+        <td><span class="tag">{{ s.late }}</span></td>
+        <td>{% if s.absent %}<span class="tag warn">{{ s.absent }}</span>{% else %}0{% endif %}</td>
+        <td>{{ s.excused }}</td>
+        <td>
+          {% if s.total %}
+            <div class="progress-line mini">
+              <div class="bar"><i class="fill fill-green" style="width:{% widthratio rate s.total 100 %}%"></i></div>
+              <b>{% widthratio rate s.total 100 %}%</b>
+            </div>
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          <a class="btn-small ghost" href="{% url 'tutors:attendance_detail' s.pk %}">{% t "Edit" %}</a>
+        </td>
+      </tr>
+      {% endwith %}
+    {% empty %}
+      <tr><td colspan="9" class="muted">{% t "No sessions yet." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}

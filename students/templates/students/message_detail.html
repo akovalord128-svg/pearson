@@ -1,0 +1,7 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{{ msg.subject|tr }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><a class="link" href="{% url 'students:messages' %}">← {% t "Messages" %}</a><h1>{{ msg.subject|tr }}</h1><p>{{ msg.sender|tr }} • {{ msg.created|date:"j M Y, H:i" }}</p></div>
+<div class="card"><p class="pre">{{ msg.body|tr }}</p></div>
+{% endblock %}

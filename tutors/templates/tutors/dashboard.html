@@ -1,0 +1,67 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Tutor Dashboard" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head row-head">
+  <div><h1>{% t "Welcome back," %} {{ request.user.first_name|default:request.user.username }}!</h1><p>{% t "Here is how your students are doing." %}</p></div>
+  <div class="head-actions">
+    <a class="btn-small ghost" href="{% url 'tutors:groups' %}"><svg class="ic"><use href="#i-users"/></svg> {% t "Groups" %}</a>
+    <a class="btn-small" href="{% url 'tutors:assignment_create' %}"><svg class="ic"><use href="#i-plus"/></svg> {% t "New assignment" %}</a>
+  </div>
+</div>
+
+<div class="kpis kpis-6">
+  <a class="card kpi" href="{% url 'tutors:students' %}"><small>{% t "Students" %}</small><strong>{{ kpis.students }}</strong></a>
+  <a class="card kpi" href="{% url 'tutors:groups' %}"><small>{% t "Groups" %}</small><strong>{{ kpis.groups }}</strong></a>
+  <a class="card kpi" href="{% url 'tutors:assignments' %}"><small>{% t "Active assignments" %}</small><strong>{{ kpis.active_assignments }}</strong></a>
+  <a class="card kpi {% if kpis.pending %}kpi-warn{% endif %}" href="{% url 'tutors:assignments' %}"><small>{% t "Waiting for review" %}</small><strong>{{ kpis.pending }}</strong></a>
+  <div class="card kpi"><small>{% t "Completion" %}</small><strong>{{ kpis.completion }}%</strong></div>
+  <div class="card kpi"><small>{% t "Average grade" %}</small><strong>{% if kpis.avg_score is None %}—{% else %}{{ kpis.avg_score }}%{% endif %}</strong></div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h3><svg class="ic warn"><use href="#i-alert"/></svg> {% t "Needs attention" %}</h3>
+    <p class="muted small">{% t "Students who are overdue or have not been active for 7+ days." %}</p>
+    <ul class="plain">
+      {% for s in attention %}
+      <li><a class="rowlink" href="{% url 'tutors:student_detail' s.user.pk %}">
+        <span class="avatar sm">{{ s.user.first_name|default:s.user.username|slice:":1"|upper }}</span>
+        <div><strong>{{ s.user.get_full_name|default:s.user.username }}</strong>
+          <small>{% if s.overdue %}{% t "%(n)s overdue" n=s.overdue %} • {% endif %}{% t "Last active" %}: {% include 'tutors/_last.html' %}</small></div></a>
+        {% if s.inactive %}<span class="tag warn">{% t "Inactive" %}</span>{% endif %}</li>
+      {% empty %}<li class="muted">{% t "Everyone is on track. 🎉" %}</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3><svg class="ic"><use href="#i-chart"/></svg> {% t "Submissions this week" %}</h3>
+    <div class="chart chart-short">
+      <div class="plot">
+        <div class="grid"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="bars">
+          {% for d in week %}<div class="barcol"><div class="bar-wrap"><em>{{ d.count }}</em><span style="height:{{ d.percent }}%"></span></div><label>{{ d.label|tr }}</label></div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h3>{% t "Recent submissions" %}</h3></div>
+    <ul class="plain">
+      {% for tk in recent %}
+      <li><a class="rowlink" href="{% url 'tutors:assignment_detail' tk.assignment_id %}"><div><strong>{{ tk.user.get_full_name|default:tk.user.username }}</strong><small>{{ tk.title }} • {{ tk.submitted_at|date:"j M, H:i" }}</small></div></a>
+        {% if tk.score is not None %}<span class="tag ok">{{ tk.score }}/{{ tk.max_score }}</span>{% else %}<span class="tag warn">{% t "To review" %}</span>{% endif %}</li>
+      {% empty %}<li class="muted">{% t "No submissions yet." %}</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>{% t "Top students" %}</h3><a class="link" href="{% url 'tutors:students' %}?sort=points">{% t "View all" %}</a></div>
+    <ol class="board">
+      {% for s in top %}<li><span class="pos">{{ forloop.counter }}</span><a href="{% url 'tutors:student_detail' s.user.pk %}">{{ s.user.get_full_name|default:s.user.username }}</a><b>{{ s.profile.points }} {% t "pts" %}</b></li>
+      {% empty %}<li class="muted">{% t "No students yet — create a group and add students." %}</li>{% endfor %}
+    </ol>
+  </div>
+</div>
+{% endblock %}

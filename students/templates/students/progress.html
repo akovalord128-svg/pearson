@@ -1,0 +1,24 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Progress" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{% t "Progress" %}</h1><p>{% t "Your grades, ranking and course results." %}</p></div>
+<div class="kpis">
+  <div class="card kpi"><small>{% t "Total Points" %}</small><strong>{{ profile.points }}</strong></div>
+  <div class="card kpi"><small>{% t "Level" %}</small><strong>{{ profile.level }}</strong></div>
+  <div class="card kpi"><small>{% t "Average grade" %}</small><strong>{{ avg }}%</strong></div>
+  <div class="card kpi"><small>{% t "Your rank" %}</small><strong>#{{ rank }}</strong></div>
+</div>
+<div class="two-col">
+  <div class="card"><h3>{% t "Courses" %}</h3>
+    {% for e in enrollments %}<div class="stat"><div class="stat-top"><span>{{ e.course.title|tr }}</span><b>{{ e.progress }}%</b></div><div class="bar"><i class="fill fill-{{ e.course.color }}" style="width:{{ e.progress }}%"></i></div></div>{% empty %}<p class="muted">{% t "You have not joined any courses yet." %}</p>{% endfor %}
+    <h3 class="mt">{% t "Grades" %}</h3>
+    <div class="table-wrap"><table class="table"><thead><tr><th>{% t "Subject" %}</th><th>{% t "Work" %}</th><th>{% t "Date" %}</th><th>{% t "Score" %}</th></tr></thead><tbody>
+      {% for g in grades %}<tr><td>{{ g.course.title|default:"—"|tr }}</td><td>{{ g.title|tr }}</td><td>{{ g.date|date:"j M" }}</td><td><b>{{ g.score }}/{{ g.max_score }}</b></td></tr>{% empty %}<tr><td colspan="4" class="muted">{% t "No grades yet." %}</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+  <div class="card"><h3>{% t "Leaderboard" %}</h3>
+    <ol class="board">{% for p in board %}<li class="{% if p.user_id == request.user.id %}me{% endif %}"><span class="pos">{{ forloop.counter }}</span><span>{{ p.user.get_full_name|default:p.user.username }}</span><b>{{ p.points }} {% t "pts" %}</b></li>{% endfor %}</ol>
+  </div>
+</div>
+{% endblock %}

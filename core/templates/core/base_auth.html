@@ -1,0 +1,19 @@
+{% load static pearson_i18n %}<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  {% include 'core/partials/theme_head.html' %}
+  <title>{% block title %}Pearson Technikum UZ{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'core/css/ios.css' %}">
+</head>
+<body class="auth-body">
+  {% include 'core/partials/icons.html' %}
+  <div class="auth-tools">{% include 'core/partials/switchers.html' %}</div>
+  <main class="auth-card">
+    <img class="auth-logo" src="{% static 'core/img/logo.png' %}" alt="Pearson — Learn · Achieve · Grow — Technikum UZ">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{% static 'core/js/app.js' %}"></script>
+</body>
+</html>

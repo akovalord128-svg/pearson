@@ -1,0 +1,47 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Student Attendance" %} — {{ student.get_full_name|default:student.username }} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head">
+  <a class="link" href="{% url 'tutors:student_detail' student.pk %}">← {{ student.get_full_name|default:student.username }}</a>
+  <h1><span class="avatar">{{ student.first_name|default:student.username|slice:":1"|upper }}</span>
+      {% t "Student Attendance" %}</h1>
+  <p>@{{ student.username }}</p>
+</div>
+
+<div class="kpis kpis-3">
+  <div class="card kpi"><small>{% t "Total sessions" %}</small><strong>{{ total }}</strong></div>
+  <div class="card kpi"><small>{% t "Attended" %}</small><strong style="color:var(--green)">{{ present }}</strong></div>
+  <div class="card kpi"><small>{% t "Attendance Rate" %}</small><strong>{{ att_pct }}%</strong></div>
+</div>
+
+<div class="card">
+  <div class="table-wrap"><table class="table wide">
+    <thead><tr>
+      <th>{% t "Date" %}</th>
+      <th>{% t "Group" %}</th>
+      <th>{% t "Topic" %}</th>
+      <th>{% t "Status" %}</th>
+      <th>{% t "Note (optional)" %}</th>
+    </tr></thead>
+    <tbody>
+    {% for rec in records %}
+    <tr>
+      <td>{{ rec.session.date|date:"j M Y" }}</td>
+      <td>{{ rec.session.group.name }}</td>
+      <td>{{ rec.session.topic|default:"—" }}</td>
+      <td>
+        {% if rec.status == "present" %}<span class="tag ok">{% t "Present" %}</span>
+        {% elif rec.status == "late" %}<span class="tag" style="background:rgba(255,159,10,.15);color:var(--orange)">{% t "Late" %}</span>
+        {% elif rec.status == "absent" %}<span class="tag warn">{% t "Absent" %}</span>
+        {% else %}<span class="tag">{% t "Excused" %}</span>{% endif %}
+      </td>
+      <td>{{ rec.note|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="muted">{% t "No attendance records yet." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}

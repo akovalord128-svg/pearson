@@ -1,0 +1,31 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "New Session" %} — Pearson{% endblock %}
+{% block content %}
+<div class="page-head">
+  <a class="link" href="{% url 'tutors:attendance_list' %}">← {% t "Back to attendance" %}</a>
+  <h1>{% t "New Session" %}</h1>
+  <p>{% t "Select group, date and topic to start taking attendance." %}</p>
+</div>
+
+<div class="card wide-form">
+  <form class="form" method="post">
+    {% csrf_token %}
+    <label>{% t "Group" %}
+      <select name="group" required>
+        <option value="">— {% t "Choose group" %} —</option>
+        {% for g in groups %}
+          <option value="{{ g.pk }}" {% if selected_group.pk == g.pk %}selected{% endif %}>{{ g.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>{% t "Date" %}
+      <input type="date" name="date" value="{{ today }}" required>
+    </label>
+    <label>{% t "Topic (optional)" %}
+      <input type="text" name="topic" maxlength="200" placeholder="{% t "e.g. Unit 3 — Reading" %}">
+    </label>
+    <button class="btn-small" type="submit"><svg class="ic"><use href="#i-check"/></svg> {% t "Continue" %}</button>
+  </form>
+</div>
+{% endblock %}

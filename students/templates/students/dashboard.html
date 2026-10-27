@@ -1,0 +1,129 @@
+{% extends 'core/base_app.html' %}
+{% load pearson_i18n %}
+{% block title %}{% t "Dashboard" %} — Pearson Technikum UZ{% endblock %}
+{% block content %}
+<div class="dash">
+  <div class="dash-main">
+
+    <section class="hero">
+      <div class="hero-text">
+        <h1>{% t "Welcome back," %}<br><span>{{ request.user.first_name|default:request.user.username }}!</span></h1>
+        <p>{% t "You’re doing great! Keep going — your goals are within reach." %}</p>
+        <i class="hero-line"></i>
+      </div>
+      <div class="hero-art">
+        <span class="script">{% t "Learn" %}<br>{% t "Grow" %}<br>{% t "Achieve" %} ♥</span>
+        <svg viewBox="0 0 360 190" class="hero-svg" aria-hidden="true">
+          <ellipse cx="190" cy="176" rx="150" ry="12" fill="#b9dcf3" opacity=".6"/>
+          <g><rect x="14" y="140" width="112" height="16" rx="3" fill="#1d5aa8"/><rect x="22" y="124" width="104" height="16" rx="3" fill="#2a74c9"/><rect x="10" y="108" width="110" height="16" rx="3" fill="#0e3f82"/><rect x="20" y="92" width="102" height="16" rx="3" fill="#3b8be0"/><rect x="12" y="76" width="106" height="16" rx="3" fill="#124a95"/></g>
+          <path d="M128 78c-6-26 8-44 30-48-2 20-12 38-30 48z" fill="#2f8f6b"/><path d="M130 78c10-22 30-30 44-26-8 18-24 28-44 26z" fill="#4aa985"/>
+          <path d="M128 78v-8" stroke="#2f8f6b" stroke-width="3"/>
+          <path d="M136 150 150 62h178l16 88z" fill="#0f3a7c"/>
+          <rect x="146" y="150" width="204" height="12" rx="5" fill="#0a2d63"/>
+          <rect x="158" y="72" width="160" height="72" rx="3" fill="#0d3470"/>
+          <circle cx="238" cy="108" r="22" fill="#1a8fe3"/><text x="238" y="118" text-anchor="middle" font-size="30" font-weight="800" fill="#fff" font-family="Georgia,serif">P</text>
+          <g><rect x="318" y="118" width="40" height="52" rx="8" fill="#0f6f8a"/><rect x="318" y="118" width="40" height="10" rx="5" fill="#0c566b"/>
+          <path d="M328 118 322 78" stroke="#4b3aa8" stroke-width="5" stroke-linecap="round"/><path d="M338 118 340 74" stroke="#2a74c9" stroke-width="5" stroke-linecap="round"/><path d="M348 118 358 80" stroke="#1d5aa8" stroke-width="5" stroke-linecap="round"/></g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="course-row">
+      {% for e in featured %}
+      <a class="card course-card" href="{% url 'students:course_detail' e.course.slug %}">
+        <div class="cc-head">
+          <span class="ico ico-{{ e.course.color }}"><svg class="ic"><use href="#i-{{ e.course.icon }}"/></svg></span>
+          <strong>{{ e.course.title|tr }}</strong>
+          <svg class="ic chev-r"><use href="#i-right"/></svg>
+        </div>
+        <small class="cc-sub">{{ e.course.subtitle|tr }}</small>
+        <div class="progress-line"><div class="bar"><i class="fill fill-{{ e.course.color }}" style="width:{{ e.progress }}%"></i></div><b>{{ e.progress }}%</b></div>
+        <small class="cc-next">{% t "Next milestone: Level %(n)s" n=e.milestone %}</small>
+      </a>
+      {% empty %}
+      <div class="card empty">{% t "You are not enrolled in any featured course yet." %} <a class="link" href="{% url 'students:courses' %}">{% t "Browse courses" %}</a></div>
+      {% endfor %}
+    </section>
+
+    <section class="tiles">
+      <a class="tile t-teal" href="{% url 'students:practice_kind' 'speaking' %}"><span class="ico ico-teal"><svg class="ic"><use href="#i-mic"/></svg></span>{% t "Speaking Practice" %}</a>
+      <a class="tile t-blue" href="{% url 'students:practice_kind' 'listening' %}"><span class="ico ico-blue"><svg class="ic"><use href="#i-headphones"/></svg></span>{% t "Listening Practice" %}</a>
+      <a class="tile t-purple" href="{% url 'students:practice_kind' 'writing' %}"><span class="ico ico-purple"><svg class="ic"><use href="#i-pencil"/></svg></span>{% t "Writing Workshop" %}</a>
+      <a class="tile t-green" href="{% url 'students:practice_kind' 'quizzes' %}"><span class="ico ico-green"><svg class="ic"><use href="#i-trophy"/></svg></span>{% t "Quizzes & Challenges" %}</a>
+      <a class="tile t-orange" href="{% url 'students:achievements' %}"><span class="ico ico-orange"><svg class="ic"><use href="#i-certificate"/></svg></span>{% t "Certificates & Achievements" %}</a>
+    </section>
+
+    <section class="bottom-row">
+      <div class="card weekly">
+        <div class="card-head"><h3><svg class="ic"><use href="#i-chart"/></svg> {% t "Weekly Progress" %}</h3><span class="select">{% t "This week" %} <svg class="ic"><use href="#i-down"/></svg></span></div>
+        <div class="chart">
+          <div class="yaxis"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+          <div class="plot">
+            <div class="grid"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="bars">
+              {% for d in week %}
+              <div class="barcol"><div class="bar-wrap"><em>{{ d.percent }}%</em><span style="height:{{ d.percent }}%"></span></div><label>{{ d.label|tr }}</label></div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card upcoming">
+        <div class="card-head"><h3><svg class="ic"><use href="#i-calendar"/></svg> {% t "Upcoming Tasks" %}</h3><a class="link" href="{% url 'students:tasks' %}">{% t "View all" %}</a></div>
+        <ul class="tasklist">
+          {% for t in tasks %}
+          <li>
+            <span class="ico ico-{{ t.color }} round"><svg class="ic"><use href="#i-{{ t.icon }}"/></svg></span>
+            <div><strong>{{ t.title|tr }}</strong><small>{{ t.course.title|default:"General"|tr }} • {{ t.minutes }} {% t "min" %}</small></div>
+            <span class="due"><svg class="ic"><use href="#i-calendar"/></svg> {{ t.due_label }}</span>
+            <svg class="ic chev-r"><use href="#i-right"/></svg>
+          </li>
+          {% empty %}<li class="muted">{% t "No upcoming tasks — great job!" %}</li>{% endfor %}
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <aside class="dash-side">
+    <a class="card points" href="{% url 'students:progress' %}">
+      <div class="pts-top">
+        <span class="star-badge"><svg class="ic"><use href="#i-star"/></svg></span>
+        <div><small>{% t "Total Points" %}</small><strong>{{ profile.points }}</strong></div>
+        <svg class="ic chev-r"><use href="#i-right"/></svg>
+      </div>
+      <hr>
+      <small class="lbl">{% t "Current Level" %}</small>
+      <span class="level-pill"><svg class="ic"><use href="#i-star"/></svg> {% t "Level %(n)s" n=profile.level %}</span>
+      <div class="bar"><i class="fill fill-teal" style="width:{{ profile.level_percent }}%"></i></div>
+      <small class="pts-right">{{ profile.level_points }} / {{ profile.level_target }} {% t "pts" %}</small>
+    </a>
+
+    <div class="goals-card">
+      <svg class="mountain" viewBox="0 0 280 160" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
+        <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b2f6b"/><stop offset="1" stop-color="#2f8bd0"/></linearGradient></defs>
+        <rect width="280" height="160" fill="url(#sky)"/>
+        <path d="M120 160 190 50l34 52 22-26 40 84z" fill="#3a6f66"/><path d="M150 160 205 70l40 90z" fill="#2c5b54"/>
+        <path d="M190 50l-14 22 14-6 10 8z" fill="#e8f3fb"/>
+        <path d="M190 50V26" stroke="#e8f3fb" stroke-width="2"/><path d="M190 26h20l-6 6 6 6h-20z" fill="#35b0e8"/>
+      </svg>
+      <div class="goals-text">
+        <h4>{% t "Your goals matter!" %}</h4>
+        <p>{% t "Keep learning." %}<br>{% t "Keep growing." %}</p>
+        <a class="btn-light" href="{% url 'students:goals' %}">{% t "View My Goals" %} →</a>
+      </div>
+    </div>
+
+    <div class="card stats">
+      <h3><svg class="ic"><use href="#i-chart"/></svg> {% t "Quick Stats" %}</h3>
+      {% for s in stats %}
+      <div class="stat">
+        <div class="stat-top"><span>{{ s.label|tr }}</span><b>{{ s.done }} / {{ s.total }}</b></div>
+        <div class="bar"><i class="fill fill-blue" style="width:{{ s.percent }}%"></i></div>
+      </div>
+      {% endfor %}
+      <div class="quote"><span>“</span><p>{% t "Progress, not perfection." %}<em>— Pearson</em></p></div>
+    </div>
+  </aside>
+</div>
+{% endblock %}
