@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   {% include 'core/partials/theme_head.html' %}
   <title>{% block title %}Pearson Technikum UZ{% endblock %}</title>
+  
+  <!-- 👇 HTMX kutubxonasi qo'shildi (Sahifa refresh bo'lmasligi uchun) -->
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
   <link rel="stylesheet" href="{% static 'core/css/ios.css' %}">
 </head>
-<body class="auth-body">
+<body class="auth-body" hx-boost="true"> <!-- 👇 hx-boost="true" qo'shildi -->
   {% include 'core/partials/icons.html' %}
   <div class="auth-tools">{% include 'core/partials/switchers.html' %}</div>
   <main class="auth-card">
